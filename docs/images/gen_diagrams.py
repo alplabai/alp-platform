@@ -95,9 +95,8 @@ def stack():
     for i, (n, v, l1, l2) in enumerate(comps):
         x = 24 + i * (cw + gap)
         cx = x + cw / 2
-        b += [line(f"M{cx} 132V{y0}", "ln", "a"),
-              rect(x, y0, cw, 104, "own"),
-              text(cx, y0 + 26, n, 12.5 if len(n) < 20 else 11.5, "h", "middle"),
+        b += [rect(x, y0, cw, 104, "own"),
+              text(cx, y0 + 26, n, 12.5 if len(n) < 20 else 11, "h", "middle"),
               text(cx, y0 + 50, v, 16, "h mono", "middle"),
               text(cx, y0 + 74, l1, 11.5, "q", "middle"),
               text(cx, y0 + 92, l2, 11.5, "q", "middle")]
