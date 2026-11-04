@@ -26,6 +26,8 @@ Components always release before the platform tag.
 
 A new line ships every one to two months, when a bench-validated set is ready; it takes the month it ships in. The first line is 26.11 (November 2026). The latest line gets every MICRO fix; the previous line gets security and brick-risk fixes for three months after the next line ships.
 
+There is no long-term line for now; one is added only when a customer needs it.
+
 ## Component releases for 26.11
 
 Every component cuts a new release for 26.11, and each must stay compatible with the
