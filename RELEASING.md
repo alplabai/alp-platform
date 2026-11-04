@@ -62,6 +62,8 @@ whole support window, so a fix that keeps them safe must not force a migration.
 
 ## CC3501E brick warning
 
+A part refuses to boot an image whose stamp is at or below what it has seen, so re-flashing even the same image bricks it. Flashing tools must compare against the part's own stamp; the manifest gate cannot.
+
 Flashing a CC3501E GPE stamp at or below the floor the part has already seen
 **permanently bricks the bridge**. The gate refuses any manifest with
 `gpe_stamp <= gpe_floor`; never bypass it, and never raise `gpe_floor` above a stamp you

@@ -144,7 +144,13 @@ Exit 0 = all checks pass, 1 = a check failed (an invalid manifest, including an 
     the highest of: the manifest's `gpe_floor` (must be strictly exceeded), `gpe-floor:` in
     the firmware repo's `prebuilt/BUILT_FROM` at the pinned tag, and the `gpe_stamp` of every
     already-published platform release (the last two: the image may equal, never be below).
+    Equality with a published platform's stamp passes only if that platform pinned the same
+    firmware version; with `BUILT_FROM` only when the image carries exactly that stamp.
     The failure names the source that set the floor.
+
+    A part refuses to boot an image whose stamp is at or below what it has seen, so
+    re-flashing even the same image bricks it. Flashing tools must compare against the
+    part's own stamp; this manifest gate cannot.
 
 CI runs the tests on `main` and the online check on every `line/**` push and PR.
 

@@ -289,8 +289,10 @@ def check_online(manifest: dict, fetch: Fetch, get_release: GetRelease,
         if real != cc["gpe_stamp"]:
             raise _Fail(f"{asset} is stamped {real}, manifest says {_show(cc['gpe_stamp'])}")
         # (value, source, strict): the manifest floor must be strictly cleared; a floor
-        # recorded as "the newest shipped stamp" (BUILT_FROM, published platforms) is the
-        # stamp of an image that shipped, so re-shipping that same image clears it (>=).
+        # recorded as "the newest shipped stamp" is the stamp of an image that shipped, so
+        # the same image clears it (>=): BUILT_FROM at the pinned tag describes the pinned
+        # blob (equal to the image stamp read above); a published platform only when it
+        # pinned the same firmware version. Anything else must be strictly above.
         floors = [(cc["gpe_floor"], "the manifest's gpe_floor", True)]
         text = _fetch_text(repo, tag["cc3501e-bridge-firmware"], "prebuilt/BUILT_FROM", fetch)
         m = GPE_FLOOR_LINE.search(text)
@@ -302,8 +304,11 @@ def check_online(manifest: dict, fetch: Fetch, get_release: GetRelease,
         for pub in fetch_published():
             if pub.get("platform") == manifest["platform"]:
                 continue
-            stamp = pub["components"]["cc3501e-bridge-firmware"]["gpe_stamp"]
-            floors.append((stamp, f"gpe_stamp {stamp} already published in platform-v{pub['platform']}", False))
+            pcc = pub["components"]["cc3501e-bridge-firmware"]
+            stamp = pcc["gpe_stamp"]
+            # Equal is the same image only when that platform pinned the same firmware version.
+            floors.append((stamp, f"gpe_stamp {stamp} already published in platform-v{pub['platform']}"
+                                  f" (firmware {_show(pcc.get('version'))})", pcc.get("version") != cc["version"]))
         value, source, strict = max(floors, key=lambda f: (_gpe(f[0]), f[2]))
         ok = _gpe(real) > _gpe(value) if strict else _gpe(real) >= _gpe(value)
         if not ok:

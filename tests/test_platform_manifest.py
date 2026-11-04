@@ -291,8 +291,9 @@ def test_image_missing_fails():
 
 # --- effective GPE floor: max of manifest, BUILT_FROM, published platforms ----
 
-def _pub(platform, stamp):
-    return {"platform": platform, "components": {"cc3501e-bridge-firmware": {"gpe_stamp": stamp}}}
+def _pub(platform, stamp, version="0.9.1"):
+    return {"platform": platform,
+            "components": {"cc3501e-bridge-firmware": {"version": version, "gpe_stamp": stamp}}}
 
 
 BF = ("alplabai/cc3501e-bridge-firmware", "v0.9.2", "prebuilt/BUILT_FROM")
@@ -415,3 +416,12 @@ def test_impossible_yaml_date_is_invalid_not_unreadable(tmp_path):
     with pytest.raises(pm.ManifestInvalid):
         pm.load_manifest(p)
     assert pm.main(["check", str(p)]) == 1
+
+
+def test_published_equal_same_version_passes():
+    assert run(published=[_pub("26.10.0", "0.254.43.0", "0.9.2")])["cc3501e-image-stamp"].status == "pass"
+
+
+def test_published_equal_different_version_fails():
+    r = run(published=[_pub("26.10.0", "0.254.43.0", "0.9.1")])["cc3501e-image-stamp"]
+    assert r.status == "fail" and "platform-v26.10.0" in r.message
