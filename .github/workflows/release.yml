@@ -50,6 +50,7 @@ jobs:
         run: |
           flags=""
           case "$GITHUB_REF_NAME" in *-rc*) flags="--prerelease";; esac
+          python tools/platform_manifest.py table platform.yaml > release-table.md
           gh release create "$GITHUB_REF_NAME" platform.yaml \
             --repo "$GITHUB_REPOSITORY" --title "Alp Platform ${GITHUB_REF_NAME#platform-v}" \
-            --generate-notes $flags
+            --notes-file release-table.md $flags

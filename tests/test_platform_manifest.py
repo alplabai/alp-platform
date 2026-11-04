@@ -425,3 +425,13 @@ def test_published_equal_same_version_passes():
 def test_published_equal_different_version_fails():
     r = run(published=[_pub("26.10.0", "0.254.43.0", "0.9.1")])["cc3501e-image-stamp"]
     assert r.status == "fail" and "platform-v26.10.0" in r.message
+
+
+def test_release_table_comes_from_the_manifest(capsys):
+    m = base()
+    body = pm.release_table(m)
+    for key, comp in m["components"].items():
+        assert f"`{comp['version']}`" in body and key in body
+    assert m["platform"] in body and "2626-r2" in body
+    assert pm.main(["table", str(EXAMPLE)]) == 0
+    assert capsys.readouterr().out == body

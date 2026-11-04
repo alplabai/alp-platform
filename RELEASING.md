@@ -21,13 +21,18 @@ Components always release before the platform tag.
    only a component whose binary changed.
 6. **Tag `platform-vYY.M.0`.** The `release` workflow checks the tag equals `platform`,
    re-runs the online gate, verifies the tagged commit is on `origin/line/YY.M`, and publishes the release with `platform.yaml` as an asset.
-   Add the component table and prebuilt images to the release page.
+   The release page body is generated from the manifest
+   (`python tools/platform_manifest.py table platform.yaml`), so its version table is never
+   typed by hand. Attach the prebuilt images to the release page.
+
+Diagrams and READMEs carry no release-specific version numbers; only manifests and the
+generated release pages do. Nothing has to be redrawn for a release.
 
 ## Cadence
 
 ![A new line every one to two months: the latest line gets all fixes, the previous line security and brick-risk fixes for three months](docs/images/support-windows.svg)
 
-A new line ships every one to two months, when a bench-validated set is ready; it takes the month it ships in. The first line is 26.11 (November 2026). The latest line gets every MICRO fix; the previous line gets security and brick-risk fixes for three months after the next line ships.
+A new line ships every one to two months, when a bench-validated set is ready; it takes the month it ships in. The first line is 26.11 (November 2026). The latest line gets every MICRO fix. A line that has been replaced gets security and brick-risk fixes for three months after its replacement ships, so more than one replaced line can be in that window at once.
 
 There is no long-term line for now; one is added only when a customer needs it.
 
