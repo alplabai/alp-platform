@@ -164,7 +164,7 @@ def load_manifest(path) -> dict:
         if len(raw) > MAX_MANIFEST_BYTES:
             raise ManifestUnreadable(f"{path}: larger than {MAX_MANIFEST_BYTES} bytes")
         data = yaml.load(raw.decode("utf-8"), Loader=_NoAliasLoader)
-    except (OSError, UnicodeDecodeError, yaml.YAMLError) as e:
+    except (OSError, ValueError, yaml.YAMLError) as e:  # ValueError covers UnicodeDecodeError and over-long ints
         raise ManifestUnreadable(f"{path}: {e}") from e
     if not isinstance(data, dict):
         raise ManifestInvalid(["manifest must be a YAML mapping"])

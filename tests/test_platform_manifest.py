@@ -252,3 +252,9 @@ def test_version_error_repr_is_bounded():
     with pytest.raises(ValueError) as exc:
         pm.parse_version("9" * 10000)
     assert len(str(exc.value)) < 400
+
+
+def test_overlong_int_is_unreadable(tmp_path):
+    f = tmp_path / "p.yaml"; f.write_text("platform: " + "9" * 5000 + "\n")
+    with pytest.raises(pm.ManifestUnreadable):
+        pm.load_manifest(f)
