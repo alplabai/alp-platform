@@ -82,7 +82,7 @@ line is 26.11 (November 2026).
 | MAJOR release or ABI break | no | yes, called out in the release notes |
 | GD32 or CC3501E wire-protocol change | no | yes |
 | Zephyr, hal_alif or Yocto series bump | no | yes |
-| Security fix that needs a MINOR | yes, called out in the release notes | no |
+| Security or brick-risk fix that needs a MINOR | yes, under the conditions in [RELEASING.md](RELEASING.md#micro-vs-new-line) | no |
 | Adding a validated hardware revision | yes | no |
 | Removing a validated hardware revision | no | yes |
 
@@ -137,7 +137,9 @@ Exit 0 = all checks pass, 1 = a check failed, 2 = usage error or unreadable file
     family's `board_datecode`, is buildable, and its SDK bounds include the pinned SDK;
   - `recorded` Zephyr and hal_alif match the SDK's `west.yml`, and the Yocto series
     match `meta-alp-sdk`'s `LAYERSERIES_COMPAT`;
-  - the GD32 protocol major matches the SDK host driver.
+  - the GD32 protocol major matches the SDK host driver;
+  - the released CC3501E image (`cc3501e-v<version>.bin`) really carries the manifest's
+    `gpe_stamp`, read from the image header, and that stamp is above `gpe_floor`.
 
 CI runs the tests on `main` and the online check on every `line/**` push and PR.
 

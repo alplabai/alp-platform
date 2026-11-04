@@ -137,12 +137,21 @@ FILES = {
 }
 
 
-def run(manifest=None, files=None, releases=None):
+def image_head(stamp="0.254.43.0"):
+    a, b, c, d = (int(x) for x in stamp.split("."))
+    h = bytearray(64)
+    h[0x24], h[0x25], h[0x26], h[0x27], h[0x28] = a, b, c, 0xEE, d  # 0x27 is padding
+    return bytes(h)
+
+
+def run(manifest=None, files=None, releases=None, head=None):
     files = FILES if files is None else files
+    head = image_head() if head is None else head
     m = manifest or base()
     allrel = {(pm.REPOS[k], f"v{v['version']}") for k, v in m["components"].items()}
     rel = allrel if releases is None else releases
-    res = pm.check_online(m, lambda r, ref, p: files.get((r, ref, p)), lambda r, t: (r, t) in rel)
+    res = pm.check_online(m, lambda r, ref, p: files.get((r, ref, p)), lambda r, t: (r, t) in rel,
+                          lambda r, t, n: head or None)
     return {r.name: r for r in res}
 
 
@@ -225,6 +234,7 @@ def test_cli_exit_codes(tmp_path, capsys):
 def test_cli_online_uses_injected_fetch(monkeypatch, capsys):
     monkeypatch.setattr(pm, "github_fetch", lambda r, ref, p: FILES.get((r, ref, p)))
     monkeypatch.setattr(pm, "github_release_exists", lambda r, t: True)
+    monkeypatch.setattr(pm, "github_asset_head", lambda r, t, n: image_head())
     assert pm.main(["check", str(EXAMPLE), "--online"]) == 0
     monkeypatch.setattr(pm, "github_release_exists", lambda r, t: False)
     assert pm.main(["check", str(EXAMPLE), "--online"]) == 1
@@ -258,3 +268,19 @@ def test_overlong_int_is_unreadable(tmp_path):
     f = tmp_path / "p.yaml"; f.write_text("platform: " + "9" * 5000 + "\n")
     with pytest.raises(pm.ManifestUnreadable):
         pm.load_manifest(f)
+
+
+def test_image_stamp_matches():
+    assert run()["cc3501e-image-stamp"].status == "pass"
+
+
+def test_image_stamp_mismatch_fails():
+    assert run(head=image_head("0.254.38.0"))["cc3501e-image-stamp"].status == "fail"
+
+
+def test_image_stamp_padding_byte_ignored():
+    assert pm.gpe_stamp_of(image_head("0.254.43.7")) == "0.254.43.7"
+
+
+def test_image_missing_fails():
+    assert run(head=b"")["cc3501e-image-stamp"].status == "fail"

@@ -202,11 +202,45 @@ def _fetch_or_fail(name: str, fetch: Fetch, repo: str, ref: str, path: str):
     return text, None
 
 
-def check_online(manifest: dict, fetch: Fetch, release_exists: ReleaseExists) -> list[Result]:
+def gpe_stamp_of(head: bytes) -> str:
+    """The CC35 vendor image's GPE stamp. Layout: 0x24 major, 0x25 minor,
+    0x26 patch, 0x27 PADDING, 0x28 fourth field. A flat 0x24..0x28 slice reads
+    the padding as the fourth field and makes different stamps compare equal."""
+    if len(head) < 0x29:
+        raise ValueError("image header shorter than 0x29 bytes")
+    return "%d.%d.%d.%d" % (head[0x24], head[0x25], head[0x26], head[0x28])
+
+
+def check_online(manifest: dict, fetch: Fetch, release_exists: ReleaseExists,
+                 fetch_asset_head=None) -> list[Result]:
     comps = manifest["components"]
     ver = {k: comps[k]["version"] for k in REPOS}
     tag = {k: f"v{v}" for k, v in ver.items()}
     out = []
+
+    # g2. the released CC3501E image really carries the manifest's gpe_stamp.
+    # Hardware-damage check: a stamp at or below a part's floor permanently
+    # bricks the bridge, so the stamp is read from the shipped image, not trusted.
+    name = "cc3501e-image-stamp"
+    cc = comps["cc3501e-bridge-firmware"]
+    asset = f"cc3501e-v{cc['version']}.bin"
+    head = fetch_asset_head(REPOS["cc3501e-bridge-firmware"], tag["cc3501e-bridge-firmware"], asset) \
+        if fetch_asset_head else None
+    if head is None:
+        out.append(Result(name, "fail", f"could not read release asset {asset} to verify its GPE stamp"))
+    else:
+        try:
+            real = gpe_stamp_of(head)
+        except ValueError as e:
+            out.append(Result(name, "fail", f"{asset}: {e}"))
+        else:
+            if real != cc.get("gpe_stamp"):
+                out.append(Result(name, "fail", f"{asset} is stamped {real}, manifest says {_show(cc.get('gpe_stamp'))}"))
+            elif not _gpe(real) > _gpe(cc["gpe_floor"]):
+                out.append(Result(name, "fail", f"{asset} is stamped {real}, at or below gpe_floor {cc['gpe_floor']}: "
+                                  "flashing it PERMANENTLY BRICKS any CC3501E bridge that has seen the floor"))
+            else:
+                out.append(Result(name, "pass", f"{asset} stamped {real}"))
 
     # a. published releases
     missing = [f"{REPOS[k]} {tag[k]}" for k in REPOS if not release_exists(REPOS[k], tag[k])]
@@ -339,6 +373,22 @@ def github_fetch(repo: str, ref: str, path: str) -> Optional[str]:
     return None if body is None else body.decode("utf-8")
 
 
+def github_asset_head(repo: str, tag: str, name: str, nbytes: int = 64) -> Optional[bytes]:
+    """First `nbytes` of a release asset, or None when the release/asset is missing."""
+    body = _api(f"https://api.github.com/repos/{repo}/releases/tags/{tag}", "application/vnd.github+json")
+    if body is None:
+        return None
+    for a in json.loads(body).get("assets", []):
+        if a.get("name") == name:
+            req = urllib.request.Request(a["url"], headers={"Accept": "application/octet-stream",
+                                                            "Range": f"bytes=0-{nbytes - 1}"})
+            if os.environ.get("GITHUB_TOKEN"):
+                req.add_header("Authorization", f"Bearer {os.environ['GITHUB_TOKEN']}")
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                return resp.read(nbytes)
+    return None
+
+
 def github_release_exists(repo: str, tag: str) -> bool:
     return _api(f"https://api.github.com/repos/{repo}/releases/tags/{tag}",
                 "application/vnd.github+json") is not None
@@ -368,7 +418,7 @@ def main(argv=None) -> int:
         m = None
     if m is not None and args.online:
         try:
-            results += check_online(m, github_fetch, github_release_exists)
+            results += check_online(m, github_fetch, github_release_exists, github_asset_head)
         except (urllib.error.URLError, OSError) as e:
             print(f"error: GitHub API unreachable: {e}", file=sys.stderr)
             return 2
