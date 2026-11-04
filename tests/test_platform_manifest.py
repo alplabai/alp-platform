@@ -234,3 +234,21 @@ def test_rev_must_be_composed_form(tmp_path):
     d = copy.deepcopy(base()); d["validated_hw"] = [{"som": "E1M-AEN801", "rev": "r2"}]
     with pytest.raises(pm.ManifestInvalid):
         pm.load_manifest(write(tmp_path, d))
+
+
+def test_yaml_alias_refused(tmp_path):
+    f = tmp_path / "p.yaml"; f.write_text("a: &x [1, 2]\nb: *x\n")
+    with pytest.raises(pm.ManifestUnreadable, match="alias"):
+        pm.load_manifest(f)
+
+
+def test_oversized_manifest_refused(tmp_path):
+    f = tmp_path / "p.yaml"; f.write_text("x: " + "y" * (pm.MAX_MANIFEST_BYTES + 1))
+    with pytest.raises(pm.ManifestUnreadable, match="larger than"):
+        pm.load_manifest(f)
+
+
+def test_version_error_repr_is_bounded():
+    with pytest.raises(ValueError) as exc:
+        pm.parse_version("9" * 10000)
+    assert len(str(exc.value)) < 400

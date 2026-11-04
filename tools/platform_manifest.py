@@ -12,6 +12,7 @@ import datetime
 import json
 import os
 import re
+import reprlib
 import sys
 import urllib.error
 import urllib.request
@@ -66,15 +67,15 @@ def _r(name: str, ok: bool, msg_fail: str, msg_ok: str = "ok") -> Result:
 def parse_version(text: str) -> tuple[int, int, int, Optional[int]]:
     """Platform version -> (yy, m, micro, rc). rc is None for GA."""
     if not isinstance(text, str):
-        raise ValueError(f"platform version must be a string, got {text!r}")
+        raise ValueError(f"platform version must be a string, got {_show(text)}")
     m = PADDED_RE.match(text)
     if m:
         raise ValueError(
-            f"{text!r}: month must not be zero-padded; write "
+            f"{_show(text)}: month must not be zero-padded; write "
             f"{m.group(1)}.{m.group(2)}.{m.group(3)}")
     m = VERSION_RE.match(text)
     if not m:
-        raise ValueError(f"{text!r} does not match YY.M.MICRO[-rcN] (e.g. 27.2.0, 27.2.0-rc1)")
+        raise ValueError(f"{_show(text)} does not match YY.M.MICRO[-rcN] (e.g. 27.2.0, 27.2.0-rc1)")
     return int(m[1]), int(m[2]), int(m[3]), int(m[5]) if m[5] else None
 
 
@@ -93,7 +94,7 @@ def _semver(text: str):
     """Component SemVer -> sortable key; a pre-release sorts before its GA."""
     m = SEMVER_RE.match(text)
     if not m:
-        raise ValueError(f"not a SemVer version: {text!r}")
+        raise ValueError(f"not a SemVer version: {_show(text)}")
     core = tuple(int(x) for x in m.groups()[:3])
     return core, (1, "") if m[4] is None else (0, m[4])
 
@@ -121,7 +122,7 @@ def check_offline(manifest: dict) -> list[Result]:
         datetime.date.fromisoformat(str(manifest.get("released")))
         out.append(Result("released-date", "pass", "ok"))
     except ValueError:
-        out.append(Result("released-date", "fail", f"released {manifest.get('released')!r} is not a real ISO date"))
+        out.append(Result("released-date", "fail", f"released {_show(manifest.get('released'))} is not a real ISO date"))
     cc = manifest.get("components", {}).get("cc3501e-bridge-firmware", {})
     try:
         stamp, floor = cc["gpe_stamp"], cc["gpe_floor"]
@@ -134,10 +135,35 @@ def check_offline(manifest: dict) -> list[Result]:
     return out
 
 
+#: A real manifest is about 1 KiB; anything far larger is not one.
+MAX_MANIFEST_BYTES = 64 * 1024
+
+_REPR = reprlib.Repr()
+_REPR.maxstring = 80
+_REPR.maxother = 80
+
+
+def _show(value) -> str:
+    """Bounded repr for messages about untrusted manifest values."""
+    return _REPR.repr(value)
+
+
+class _NoAliasLoader(yaml.SafeLoader):
+    """A manifest has no use for anchors/aliases; refusing them removes
+    alias-amplification ("billion laughs") inputs outright."""
+
+    def compose_node(self, parent, index):
+        if self.check_event(yaml.AliasEvent):
+            raise yaml.YAMLError("YAML aliases are not allowed in a platform manifest")
+        return super().compose_node(parent, index)
+
+
 def load_manifest(path) -> dict:
     try:
-        text = Path(path).read_text(encoding="utf-8")
-        data = yaml.safe_load(text)
+        raw = Path(path).read_bytes()
+        if len(raw) > MAX_MANIFEST_BYTES:
+            raise ManifestUnreadable(f"{path}: larger than {MAX_MANIFEST_BYTES} bytes")
+        data = yaml.load(raw.decode("utf-8"), Loader=_NoAliasLoader)
     except (OSError, UnicodeDecodeError, yaml.YAMLError) as e:
         raise ManifestUnreadable(f"{path}: {e}") from e
     if not isinstance(data, dict):
@@ -146,7 +172,7 @@ def load_manifest(path) -> dict:
         data["released"] = data["released"].isoformat()
     problems = []
     if data.get("schema") != "alp-platform-v1":
-        raise ManifestInvalid([f"unsupported schema {data.get('schema')!r}; supported: alp-platform-v1"])
+        raise ManifestInvalid([f"unsupported schema {_show(data.get('schema'))}; supported: alp-platform-v1"])
     try:
         parse_version(data.get("platform"))  # gives the named-unpadded-form message
     except ValueError as e:
