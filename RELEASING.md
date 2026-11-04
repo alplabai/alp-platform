@@ -8,16 +8,19 @@ Components always release before the platform tag.
    through its own flow (alp-sdk, tan-cli, alp-sdk-vscode, gd32-bridge-firmware,
    cc3501e-bridge-firmware).
 2. **Write the manifest.** Branch `line/YY.M` from `main`, add `platform.yaml` at the root
-   (start from `examples/platform.example.yaml`), tag `platform-vYY.M.0-rc1`.
+   (start from `examples/platform.example.yaml`), set `platform: YY.M.0-rc1`, run the gate
+   (step 3) and only then tag `platform-vYY.M.0-rc1`.
 3. **Run the gate.** `python tools/platform_manifest.py check platform.yaml --online`
-   (CI runs it on every push and PR to `line/**`). Fix the manifest until it passes.
+   (CI runs it on every push and PR to `line/**`). Fix the manifest until it passes. The
+   gate checks the GD32 protocol **major** only; the minor is not verified, so confirm it
+   against the firmware by hand.
 4. **Bench-validate** every `validated_hw` rev: build with tan from the manifest, run the
    HIL suite **serially** on labgrid-reserved boards (one board at a time, reserve before
    use), and link the evidence in `bench_evidence`.
 5. **Promote** components from rc to GA, update the manifest, re-run the gate. Re-bench
    only a component whose binary changed.
 6. **Tag `platform-vYY.M.0`.** The `release` workflow checks the tag equals `platform`,
-   re-runs the online gate, and publishes the release with `platform.yaml` as an asset.
+   re-runs the online gate, verifies the tagged commit is on `origin/line/YY.M`, and publishes the release with `platform.yaml` as an asset.
    Add the component table and prebuilt images to the release page.
 
 ## Cadence

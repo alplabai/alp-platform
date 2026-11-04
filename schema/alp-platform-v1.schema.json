@@ -9,9 +9,9 @@
     "schema": { "const": "alp-platform-v1" },
     "platform": {
       "type": "string",
-      "pattern": "^(\\d{2})\\.([1-9]|1[0-2])\\.(0|[1-9]\\d*)(-rc[1-9]\\d*)?$"
+      "pattern": "^([0-9]{2})\\.([1-9]|1[0-2])\\.(0|[1-9][0-9]*)(-rc[1-9][0-9]*)?$"
     },
-    "released": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "released": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
     "components": {
       "type": "object",
       "additionalProperties": false,
@@ -23,7 +23,7 @@
         "gd32-bridge-firmware": {
           "allOf": [{ "$ref": "#/$defs/component" }],
           "required": ["protocol"],
-          "properties": { "protocol": { "type": "string", "pattern": "^\\d+\\.\\d+$" } }
+          "properties": { "protocol": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" } }
         },
         "cc3501e-bridge-firmware": {
           "allOf": [{ "$ref": "#/$defs/component" }],
@@ -53,7 +53,7 @@
         "type": "object",
         "required": ["som", "rev"],
         "properties": {
-          "som": { "type": "string", "pattern": "^E1M-(AEN|V2N|V2M)\\d+$" },
+          "som": { "type": "string", "pattern": "^E1M-(AEN|V2N|V2M)[0-9]+$" },
           "rev": { "type": "string", "pattern": "^[0-9]{4}-r[1-9][0-9]*$", "description": "Composed board revision as stored in the module EEPROM hw_rev field: <board_datecode>-<rev key>, e.g. 2626-r2" }
         }
       }
@@ -67,10 +67,10 @@
       "properties": {
         "version": {
           "type": "string",
-          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(-[0-9A-Za-z][0-9A-Za-z.-]*)?$"
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-[0-9A-Za-z][0-9A-Za-z.-]*)?$"
         }
       }
     },
-    "gpe": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+\\.\\d+$" }
+    "gpe": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+$" }
   }
 }

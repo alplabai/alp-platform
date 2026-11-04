@@ -97,7 +97,7 @@ versions).
 | `platform` | the platform version, e.g. `26.11.0` |
 | `released` | release date of this MICRO |
 | `components` | exact versions of alp-sdk, tan-cli, alp-sdk-vscode, gd32-bridge-firmware (with its wire protocol) and cc3501e-bridge-firmware (with its GPE stamp and floor) |
-| `recorded` | upstream versions that come in through the SDK: Zephyr, hal_alif, Yocto series, Renesas BSP and AI SDK |
+| `recorded` | upstream versions that come in through the SDK: Zephyr, hal_alif, Yocto series (checked online against the SDK), Renesas BSP and AI SDK (`renesas_bsp`, `renesas_ai_sdk`: informational only, never checked) |
 | `validated_hw` | the module revisions this set was bench-run on, in the form the module EEPROM and PCB carry, e.g. `E1M-AEN801` `2626-r2` |
 | `bench_evidence` | link to the hardware-in-the-loop run (optional) |
 
@@ -125,21 +125,26 @@ python tools/platform_manifest.py check platform.yaml --online --json
 python -m pytest -q                                              # tool tests
 ```
 
-Exit 0 = all checks pass, 1 = a check failed, 2 = usage error or unreadable file.
+Exit 0 = all checks pass, 1 = a check failed (an invalid manifest, including an impossible date, is a failed check). Exit 2 = usage error (`--help` included), an unreadable manifest (missing, not YAML, duplicate keys, aliases, over 64 KiB, too deeply nested), or a GitHub network/API error.
 
 - **Offline:** schema, version grammar, a real release date, the CC3501E stamp above its
-  floor. YAML aliases and files over 64 KiB are refused.
+  floor. YAML aliases, duplicate keys, newlines in any string and files over 64 KiB are refused.
 - **Online**, read from each component repo at its `v<version>` tag:
-  - every component has a published release;
+  - every component has a published release; a GA platform (no `-rc`) pins no pre-release
+    component version and no release marked prerelease;
   - the extension's `MIN_SDK_VERSION` is at or below the pinned SDK;
   - tan-cli's supported build-plan `schemaVersion` equals the SDK's;
   - each validated revision exists in the SDK's `hw-revisions.yaml`, matches the
     family's `board_datecode`, is buildable, and its SDK bounds include the pinned SDK;
   - `recorded` Zephyr and hal_alif match the SDK's `west.yml`, and the Yocto series
     match `meta-alp-sdk`'s `LAYERSERIES_COMPAT`;
-  - the GD32 protocol major matches the SDK host driver;
+  - the GD32 protocol **major** matches the SDK host driver (only the major is checked; the SDK defines no single minor);
   - the released CC3501E image (`cc3501e-v<version>.bin`) really carries the manifest's
-    `gpe_stamp`, read from the image header, and that stamp is above `gpe_floor`.
+    `gpe_stamp`, read from the image header, and that stamp clears the **effective floor**,
+    the highest of: the manifest's `gpe_floor` (must be strictly exceeded), `gpe-floor:` in
+    the firmware repo's `prebuilt/BUILT_FROM` at the pinned tag, and the `gpe_stamp` of every
+    already-published platform release (the last two: the image may equal, never be below).
+    The failure names the source that set the floor.
 
 CI runs the tests on `main` and the online check on every `line/**` push and PR.
 

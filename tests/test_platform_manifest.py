@@ -134,6 +134,7 @@ FILES = {
         'LAYERSERIES_COMPAT_alp-sdk = "kirkstone scarthgap"\n',
     ("alplabai/alp-sdk", SDK_TAG, "include/alp/chips/gd32g553.h"):
         "#define GD32G553_HOST_PROTOCOL_MAJOR 0u\n",
+    ("alplabai/cc3501e-bridge-firmware", "v0.9.2", "prebuilt/BUILT_FROM"): "# x\ngpe-floor:    0.254.38.0\n",
 }
 
 
@@ -144,14 +145,15 @@ def image_head(stamp="0.254.43.0"):
     return bytes(h)
 
 
-def run(manifest=None, files=None, releases=None, head=None):
-    files = FILES if files is None else files
+def run(manifest=None, files=None, releases=None, head=None, published=(), prerelease=()):
+    files = dict(FILES if files is None else files)
     head = image_head() if head is None else head
     m = manifest or base()
     allrel = {(pm.REPOS[k], f"v{v['version']}") for k, v in m["components"].items()}
     rel = allrel if releases is None else releases
-    res = pm.check_online(m, lambda r, ref, p: files.get((r, ref, p)), lambda r, t: (r, t) in rel,
-                          lambda r, t, n: head or None)
+    res = pm.check_online(m, lambda r, ref, p: files.get((r, ref, p)),
+                          lambda r, t: {"prerelease": (r, t) in prerelease} if (r, t) in rel else None,
+                          lambda r, t, n: head or None, lambda: list(published))
     return {r.name: r for r in res}
 
 
@@ -233,10 +235,11 @@ def test_cli_exit_codes(tmp_path, capsys):
 
 def test_cli_online_uses_injected_fetch(monkeypatch, capsys):
     monkeypatch.setattr(pm, "github_fetch", lambda r, ref, p: FILES.get((r, ref, p)))
-    monkeypatch.setattr(pm, "github_release_exists", lambda r, t: True)
+    monkeypatch.setattr(pm, "github_get_release", lambda r, t: {"prerelease": False})
     monkeypatch.setattr(pm, "github_asset_head", lambda r, t, n: image_head())
+    monkeypatch.setattr(pm, "github_published_manifests", lambda: [])
     assert pm.main(["check", str(EXAMPLE), "--online"]) == 0
-    monkeypatch.setattr(pm, "github_release_exists", lambda r, t: False)
+    monkeypatch.setattr(pm, "github_get_release", lambda r, t: None)
     assert pm.main(["check", str(EXAMPLE), "--online"]) == 1
 
 
@@ -284,3 +287,131 @@ def test_image_stamp_padding_byte_ignored():
 
 def test_image_missing_fails():
     assert run(head=b"")["cc3501e-image-stamp"].status == "fail"
+
+
+# --- effective GPE floor: max of manifest, BUILT_FROM, published platforms ----
+
+def _pub(platform, stamp):
+    return {"platform": platform, "components": {"cc3501e-bridge-firmware": {"gpe_stamp": stamp}}}
+
+
+BF = ("alplabai/cc3501e-bridge-firmware", "v0.9.2", "prebuilt/BUILT_FROM")
+
+
+def test_floor_set_by_manifest_is_strict(tmp_path):
+    m = base(); m["components"]["cc3501e-bridge-firmware"]["gpe_floor"] = "0.254.43.0"
+    r = run(manifest=m)["cc3501e-image-stamp"]
+    assert r.status == "fail" and "manifest's gpe_floor" in r.message and "BRICKS" in r.message
+
+
+def test_floor_set_by_built_from():
+    f = dict(FILES); f[BF] = "gpe-floor:  0.254.44.0\n"
+    r = run(files=f)["cc3501e-image-stamp"]
+    assert r.status == "fail" and "BUILT_FROM" in r.message
+
+
+def test_built_from_equal_to_stamp_passes():
+    f = dict(FILES); f[BF] = "gpe-floor:  0.254.43.0\n"
+    assert run(files=f)["cc3501e-image-stamp"].status == "pass"
+
+
+def test_floor_set_by_published_release():
+    r = run(published=[_pub("26.10.0", "0.254.50.0")])["cc3501e-image-stamp"]
+    assert r.status == "fail" and "platform-v26.10.0" in r.message
+
+
+def test_published_lower_and_own_tag_ignored():
+    r = run(published=[_pub("26.10.0", "0.254.40.0"), _pub("26.11.0", "0.254.99.0")])
+    assert r["cc3501e-image-stamp"].status == "pass"
+
+
+def test_built_from_missing_or_malformed_fails():
+    f = dict(FILES); f[BF] = "no floor here\n"
+    assert run(files=f)["cc3501e-image-stamp"].status == "fail"
+    f = {k: v for k, v in FILES.items()}
+    assert run(files=f, head=image_head("0.254.43.0"))["cc3501e-image-stamp"].status == "pass"
+
+
+def test_published_unreadable_is_fail_not_crash():
+    r = pm.check_online(base(), lambda r, ref, p: FILES.get((r, ref, p)),
+                        lambda r, t: {"prerelease": False}, lambda r, t, n: image_head(), None)
+    assert {x.name: x for x in r}["cc3501e-image-stamp"].status == "fail"
+
+
+# --- hardening ----------------------------------------------------------------
+
+def test_non_ascii_digits_and_newline_refused(tmp_path):
+    d = base(); d["platform"] = "27.2.0\n"
+    with pytest.raises(pm.ManifestInvalid):
+        pm.load_manifest(write(tmp_path, d))
+    d = base(); d["components"]["tan-cli"]["version"] = "0.٨.0"
+    with pytest.raises(pm.ManifestInvalid):
+        pm.load_manifest(write(tmp_path, d))
+    with pytest.raises(ValueError):
+        pm.parse_version("27.2.0\n")
+    with pytest.raises(ValueError):
+        pm.parse_version("2٧.2.0")
+
+
+def test_newline_in_any_string_refused(tmp_path):
+    d = base(); d["bench_evidence"] = "http://x\nevil"
+    with pytest.raises(pm.ManifestInvalid, match="newline"):
+        pm.load_manifest(write(tmp_path, d))
+
+
+def test_ga_refuses_prerelease_component_and_prerelease_release():
+    m = base(); m["components"]["tan-cli"]["version"] = "0.8.0-rc1"
+    assert run(manifest=m)["releases-published"].status == "fail"
+    pre = {("alplabai/tan-cli", "v0.8.0")}
+    assert run(prerelease=pre)["releases-published"].status == "fail"
+    m = base(); m["platform"] = "27.2.0-rc1"; m["components"]["tan-cli"]["version"] = "0.8.0-rc1"
+    assert run(manifest=m, prerelease=pre)["releases-published"].status == "pass"
+
+
+def test_gd32_macro_missing_is_fail():
+    f = dict(FILES); f[("alplabai/alp-sdk", SDK_TAG, "include/alp/chips/gd32g553.h")] = "/* nothing */"
+    assert run(files=f)["gd32-protocol-major"].status == "fail"
+
+
+def test_malformed_remote_content_is_fail_not_crash():
+    f = dict(FILES)
+    f[("alplabai/alp-sdk", SDK_TAG, "west.yml")] = "a: [unclosed"
+    f[("alplabai/alp-sdk", SDK_TAG, "metadata/schemas/build-plan-v1.schema.json")] = "not json"
+    f[("alplabai/alp-sdk", SDK_TAG, "metadata/e1m_modules/aen/hw-revisions.yaml")] = "- just\n- a list\n"
+    res = run(files=f)
+    for n in ("recorded-west", "tan-build-plan-schema", "validated-hw:E1M-AEN801:2626-r2"):
+        assert res[n].status == "fail"
+
+
+def test_hw_bounds_null_unbounded_malformed_fails():
+    def hwrun(entry):
+        f = dict(FILES)
+        f[("alplabai/alp-sdk", SDK_TAG, "metadata/e1m_modules/aen/hw-revisions.yaml")] = yaml.safe_dump(
+            {"board_datecode": "2626", "hw_revisions": {"r2": entry}})
+        return run(files=f)["validated-hw:E1M-AEN801:2626-r2"].status
+    assert hwrun({"status": "production", "min_sdk_version": None}) == "pass"
+    assert hwrun({"status": "production"}) == "pass"
+    assert hwrun({"status": "production", "min_sdk_version": "garbage"}) == "fail"
+    assert hwrun({"status": "production", "max_sdk_version": 7}) == "fail"
+
+
+def test_duplicate_keys_refused(tmp_path):
+    p = tmp_path / "p.yaml"
+    p.write_text(EXAMPLE.read_text() + "platform: 27.2.1\n")
+    with pytest.raises(pm.ManifestUnreadable, match="duplicate"):
+        pm.load_manifest(p)
+
+
+def test_deep_nesting_is_unreadable(tmp_path):
+    p = tmp_path / "p.yaml"
+    p.write_text("x: " + "[" * 5000 + "]" * 5000 + "\n")
+    with pytest.raises(pm.ManifestUnreadable):
+        pm.load_manifest(p)
+
+
+def test_impossible_yaml_date_is_invalid_not_unreadable(tmp_path):
+    p = tmp_path / "p.yaml"
+    p.write_text(EXAMPLE.read_text().replace("2026-11-30", "2026-11-31"))
+    with pytest.raises(pm.ManifestInvalid):
+        pm.load_manifest(p)
+    assert pm.main(["check", str(p)]) == 1
