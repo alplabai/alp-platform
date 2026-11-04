@@ -490,6 +490,39 @@ def github_published_manifests() -> list[dict]:
 
 # --- CLI -------------------------------------------------------------------
 
+def release_table(m: dict) -> str:
+    """Markdown body for a platform release page, generated from its manifest,
+    so no version number is ever typed by hand into docs or images."""
+    c = m["components"]
+    rows = [
+        "| Component | Version |",
+        "| --- | --- |",
+    ]
+    for key in REPOS:
+        v = c[key]["version"]
+        rows.append(f"| [{key}](https://github.com/{REPOS[key]}/releases/tag/v{v}) | `{v}` |")
+    gd, cc = c["gd32-bridge-firmware"], c["cc3501e-bridge-firmware"]
+    out = [f"## Alp Platform {m['platform']}", "", f"Released {m['released']}.", "", *rows, "",
+           f"GD32 wire protocol `{gd['protocol']}`. CC3501E image GPE stamp `{cc['gpe_stamp']}` "
+           f"(floor `{cc['gpe_floor']}`).", ""]
+    rec = m.get("recorded") or {}
+    if rec:
+        out += ["Recorded upstream versions:", ""]
+        for k, v in rec.items():
+            shown = ", ".join(v) if isinstance(v, list) else v
+            out.append(f"- {k}: `{shown}`")
+        out.append("")
+    hw = m.get("validated_hw") or []
+    out += ["Validated hardware:", ""]
+    out += [f"- {h['som']} `{h['rev']}`" for h in hw] or ["- none listed"]
+    out.append("")
+    if m.get("bench_evidence"):
+        out += [f"Bench evidence: {m['bench_evidence']}", ""]
+    out.append("Pin it with `tan platform use " + m["platform"] + "`. "
+               "Pinning never writes firmware to a board.")
+    return "\n".join(out) + "\n"
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="platform_manifest")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -497,10 +530,22 @@ def main(argv=None) -> int:
     c.add_argument("manifest")
     c.add_argument("--online", action="store_true")
     c.add_argument("--json", action="store_true")
+    tb = sub.add_parser("table", help="print the release-page version table for a manifest")
+    tb.add_argument("manifest")
     try:
         args = ap.parse_args(argv)
     except SystemExit:
         return 2
+    if args.cmd == "table":
+        try:
+            print(release_table(load_manifest(args.manifest)), end="")
+        except ManifestUnreadable as e:
+            print(f"error: {e}", file=sys.stderr)
+            return 2
+        except ManifestInvalid as e:
+            print("error: invalid manifest: " + "; ".join(e.problems), file=sys.stderr)
+            return 1
+        return 0
     try:
         m = load_manifest(args.manifest)
         results = check_offline(m)

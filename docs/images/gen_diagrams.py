@@ -79,18 +79,18 @@ def line(d, cls="ln", marker="a"):
 def stack():
     W, b = 960, []
     b.append(text(24, 36, "One platform version pins a tested set of components", 18, "h"))
-    b.append(text(24, 58, "Example: Alp Platform 26.11.0 (versions illustrative)", 13, "q"))
+    b.append(text(24, 58, "The exact versions of every release are in its platform.yaml and on its release page", 13, "q"))
     # platform bar
     b += [rect(24, 76, 912, 56, "acc"),
-          text(480, 101, "Alp Platform 26.11.0", 17, "h", "middle"),
-          text(480, 121, "CalVer · platform.yaml · tag platform-v26.11.0", 12, "q", "middle")]
+          text(480, 101, "Alp Platform YY.M.MICRO", 17, "h", "middle"),
+          text(480, 121, "CalVer · one platform.yaml per release · tag platform-v<version>", 12, "q", "middle")]
     # owned components
     b.append(text(24, 162, "OWNED — exact version pinned, each keeps its own SemVer", 11.5, "q h"))
-    comps = [("alp-sdk", "0.18.0", "C API · metadata", "meta-alp-sdk layer"),
-             ("tan-cli", "0.8.0", "build + flash CLI", "tan platform use"),
-             ("alp-sdk-vscode", "0.8.0", "VS Code extension", "status bar + warnings"),
-             ("gd32-bridge-firmware", "0.3.1", "supervisor bridge", "wire protocol 0.7"),
-             ("cc3501e-bridge-firmware", "0.9.2", "Wi-Fi / BLE bridge", "GPE stamp > floor")]
+    comps = [("alp-sdk", "X.Y.Z", "C API · metadata", "meta-alp-sdk layer"),
+             ("tan-cli", "X.Y.Z", "build + flash CLI", "tan platform use"),
+             ("alp-sdk-vscode", "X.Y.Z", "VS Code extension", "status bar + warnings"),
+             ("gd32-bridge-firmware", "X.Y.Z", "supervisor bridge", "+ wire protocol"),
+             ("cc3501e-bridge-firmware", "X.Y.Z", "Wi-Fi / BLE bridge", "+ GPE stamp > floor")]
     cw, gap, y0 = 168, 18, 174
     for i, (n, v, l1, l2) in enumerate(comps):
         x = 24 + i * (cw + gap)
@@ -103,8 +103,8 @@ def stack():
     # recorded
     yr = 304
     b.append(text(24, yr, "RECORDED — come in through an owned component, cross-checked by the gate", 11.5, "q h"))
-    recs = [("Zephyr", "v4.4.1"), ("hal_alif", "v2.3.0"), ("Yocto", "kirkstone · scarthgap"),
-            ("Renesas BSP", "v6.30"), ("Renesas AI SDK", "7.1")]
+    recs = [("Zephyr", "from west.yml"), ("hal_alif", "from west.yml"), ("Yocto series", "from layer.conf"),
+            ("Renesas BSP", "informational"), ("Renesas AI SDK", "informational")]
     for i, (n, v) in enumerate(recs):
         x = 24 + i * (cw + gap)
         b += [rect(x, yr + 12, cw, 50, "rec"),
@@ -114,8 +114,8 @@ def stack():
     yh = 400
     b.append(text(24, yh, "VALIDATED HARDWARE — bench-run with exactly this set", 11.5, "q h"))
     b += [rect(24, yh + 12, 260, 44, "hw"),
-          text(154, yh + 39, "E1M-AEN801  2626-R2", 13, "h mono", "middle"),
-          text(300, yh + 39, "rev = EEPROM hw_rev form <board_datecode>-<rev key>, printed as on the PCB", 12, "q")]
+          text(154, yh + 39, "<SoM>  <board rev>", 13, "h mono", "middle"),
+          text(300, yh + 39, "rev = EEPROM hw_rev form <board_datecode>-<rev key>, e.g. 2626-r2", 12, "q")]
     return svg(W, 476, "One platform version pins a tested set of components", b)
 
 
@@ -181,7 +181,7 @@ def consumers():
           text(134, 116, "release asset platform.yaml", 11.5, "q", "middle"),
           text(134, 132, "or --manifest FILE", 11.5, "q", "middle")]
     b += [rect(320, 70, 220, 70, "own"),
-          text(430, 96, "tan platform use 26.11", 13, "h mono", "middle"),
+          text(430, 96, "tan platform use <line>", 13, "h mono", "middle"),
           text(430, 116, "validates, writes the pin", 11.5, "q", "middle"),
           text(430, 132, "never flashes firmware", 11.5, "q", "middle")]
     b += [rect(616, 70, 320, 70, "hw"),
@@ -191,7 +191,7 @@ def consumers():
     # readers
     rd = [("alp.lock", ["platform: version +", "manifestSha256", "verify reports drift"]),
           ("tan doctor", ["data.platform", "per-component status", "match / mismatch / unknown"]),
-          ("VS Code extension", ["Alp Platform 26.11.0", "in the status bar", "off-manifest warning"])]
+          ("VS Code extension", ["Alp Platform <version>", "in the status bar", "off-manifest warning"])]
     for i, (h, ls) in enumerate(rd):
         x = 216 + i * 248
         b += [rect(x, 210, 224, 96, "box"), text(x + 112, 236, h, 13, "h", "middle")]
@@ -207,16 +207,16 @@ def consumers():
 def support():
     W, b = 960, []
     b.append(text(24, 36, "A new line every one to two months; the previous line keeps security fixes", 18, "h"))
-    months = ["Nov 26", "Dec", "Jan 27", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"]
+    months = ["month 0"] + [f"+{i}" for i in range(1, 11)]
     x0, x1, n = 176, 936, len(months) - 1
     X = lambda m: x0 + (x1 - x0) * m / n
     for i, m in enumerate(months):
         b += [f'<line class="grid" x1="{X(i)}" x2="{X(i)}" y1="72" y2="262"/>',
               text(X(i), 64, m, 11, "q", "middle")]
-    starts = [("26.11", 0), ("27.1", 2), ("27.2", 3), ("27.4", 5), ("27.5", 6)]
+    starts = [("line A", 0), ("line B", 2), ("line C", 3), ("line D", 5), ("line E", 6)]
     for k, (name, s) in enumerate(starts):
         y = 92 + k * 36
-        b.append(text(24, y + 5, f"Alp Platform {name}", 13, "h"))
+        b.append(text(24, y + 5, name, 13, "h"))
         e1 = starts[k + 1][1] if k + 1 < len(starts) else n
         e2 = min(e1 + 3, n)
         b.append(f'<rect class="band1" x="{X(s)}" y="{y - 9}" width="{X(e1) - X(s)}" height="18" rx="4"/>')
@@ -226,7 +226,7 @@ def support():
           text(212, 296, "latest line: all MICRO fixes", 12),
           f'<rect class="band2" x="420" y="284" width="28" height="14" rx="3"/>',
           text(456, 296, "previous line: security and brick-risk fixes, 3 months", 12)]
-    b.append(text(24, 326, "First line 26.11 (November 2026). Later dates are illustrative.", 11.5, "q"))
+    b.append(text(24, 326, "Illustrative spacing: lines ship one to two months apart; see the releases page for real dates.", 11.5, "q"))
     return svg(W, 344, "A new line every one to two months; the previous line keeps security fixes", b)
 
 

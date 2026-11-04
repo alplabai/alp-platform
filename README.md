@@ -14,12 +14,11 @@ version adds a name and a tested set on top; it never replaces a component versi
 
 ## Releases
 
-| Line | Status | Released | Manifest |
-| --- | --- | --- | --- |
-| 26.11 | In preparation | planned November 2026 | `platform-v26.11.0` once tagged |
-
 Every release is a GitHub release in this repo, tagged `platform-v<version>`, with the
-manifest `platform.yaml` attached.
+manifest `platform.yaml` attached. Its page lists the exact component versions,
+generated from that manifest by `python tools/platform_manifest.py table platform.yaml`,
+so no version number is typed by hand into this README or the diagrams. The first line
+is **26.11** (November 2026); see the [releases page](../../releases) for the current one.
 
 ## Quick start
 
@@ -70,8 +69,11 @@ line is 26.11 (November 2026).
 | Line | Gets |
 | --- | --- |
 | Latest | every MICRO fix |
-| Previous | security and brick-risk fixes, for three months after the next line ships |
-| Older | nothing; move to a newer line |
+| Replaced, less than three months ago | security and brick-risk fixes |
+| Replaced three or more months ago | nothing; move to a newer line |
+
+Because lines ship one to two months apart, more than one replaced line can still be
+receiving security fixes at the same time.
 
 ## What may change inside a line
 
