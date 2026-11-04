@@ -79,11 +79,11 @@ def line(d, cls="ln", marker="a"):
 def stack():
     W, b = 960, []
     b.append(text(24, 36, "One platform version pins a tested set of components", 18, "h"))
-    b.append(text(24, 58, "Example: Alp Platform 27.2.0 (versions illustrative)", 13, "q"))
+    b.append(text(24, 58, "Example: Alp Platform 26.11.0 (versions illustrative)", 13, "q"))
     # platform bar
     b += [rect(24, 76, 912, 56, "acc"),
-          text(480, 101, "Alp Platform 27.2.0", 17, "h", "middle"),
-          text(480, 121, "CalVer · platform.yaml · tag platform-v27.2.0", 12, "q", "middle")]
+          text(480, 101, "Alp Platform 26.11.0", 17, "h", "middle"),
+          text(480, 121, "CalVer · platform.yaml · tag platform-v26.11.0", 12, "q", "middle")]
     # owned components
     b.append(text(24, 162, "OWNED — exact version pinned, each keeps its own SemVer", 11.5, "q h"))
     comps = [("alp-sdk", "0.18.0", "C API · metadata", "meta-alp-sdk layer"),
@@ -181,7 +181,7 @@ def consumers():
           text(134, 116, "release asset platform.yaml", 11.5, "q", "middle"),
           text(134, 132, "or --manifest FILE", 11.5, "q", "middle")]
     b += [rect(320, 70, 220, 70, "own"),
-          text(430, 96, "tan platform use 27.2", 13, "h mono", "middle"),
+          text(430, 96, "tan platform use 26.11", 13, "h mono", "middle"),
           text(430, 116, "validates, writes the pin", 11.5, "q", "middle"),
           text(430, 132, "never flashes firmware", 11.5, "q", "middle")]
     b += [rect(616, 70, 320, 70, "hw"),
@@ -191,7 +191,7 @@ def consumers():
     # readers
     rd = [("alp.lock", ["platform: version +", "manifestSha256", "verify reports drift"]),
           ("tan doctor", ["data.platform", "per-component status", "match / mismatch / unknown"]),
-          ("VS Code extension", ["Alp Platform 27.2.0", "in the status bar", "off-manifest warning"])]
+          ("VS Code extension", ["Alp Platform 26.11.0", "in the status bar", "off-manifest warning"])]
     for i, (h, ls) in enumerate(rd):
         x = 216 + i * 248
         b += [rect(x, 210, 224, 96, "box"), text(x + 112, 236, h, 13, "h", "middle")]
@@ -206,27 +206,28 @@ def consumers():
 # ---------------------------------------------------------------- 5. support windows
 def support():
     W, b = 960, []
-    b.append(text(24, 36, "Quarterly lines, each supported for about six months", 18, "h"))
-    months = ["Feb 27", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan 28", "Feb", "Mar", "Apr", "May"]
+    b.append(text(24, 36, "A new line every one to two months; the previous line keeps security fixes", 18, "h"))
+    months = ["Nov 26", "Dec", "Jan 27", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"]
     x0, x1, n = 176, 936, len(months) - 1
     X = lambda m: x0 + (x1 - x0) * m / n
     for i, m in enumerate(months):
         b += [f'<line class="grid" x1="{X(i)}" x2="{X(i)}" y1="72" y2="262"/>',
               text(X(i), 64, m, 11, "q", "middle")]
-    lines = [("27.2", 0), ("27.5", 3), ("27.8", 6), ("27.11", 9), ("28.2", 12)]
-    for k, (name, s) in enumerate(lines):
+    starts = [("26.11", 0), ("27.1", 2), ("27.2", 3), ("27.4", 5), ("27.5", 6)]
+    for k, (name, s) in enumerate(starts):
         y = 92 + k * 36
         b.append(text(24, y + 5, f"Alp Platform {name}", 13, "h"))
-        e1, e2 = min(s + 3, n), min(s + 6, n)
+        e1 = starts[k + 1][1] if k + 1 < len(starts) else n
+        e2 = min(e1 + 3, n)
         b.append(f'<rect class="band1" x="{X(s)}" y="{y - 9}" width="{X(e1) - X(s)}" height="18" rx="4"/>')
-        if e2 > e1:
+        if k + 1 < len(starts) and e2 > e1:
             b.append(f'<rect class="band2" x="{X(e1)}" y="{y - 9}" width="{X(e2) - X(e1)}" height="18" rx="4"/>')
     b += [f'<rect class="band1" x="176" y="284" width="28" height="14" rx="3"/>',
           text(212, 296, "latest line: all MICRO fixes", 12),
           f'<rect class="band2" x="420" y="284" width="28" height="14" rx="3"/>',
-          text(456, 296, "previous line: security and brick-risk fixes only", 12)]
-    b.append(text(24, 326, "Proposed cadence; an unused line can be skipped. Dates are illustrative.", 11.5, "q"))
-    return svg(W, 344, "Quarterly lines, each supported for about six months", b)
+          text(456, 296, "previous line: security and brick-risk fixes, 3 months", 12)]
+    b.append(text(24, 326, "First line 26.11 (November 2026). Later dates are illustrative.", 11.5, "q"))
+    return svg(W, 344, "A new line every one to two months; the previous line keeps security fixes", b)
 
 
 if __name__ == "__main__":

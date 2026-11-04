@@ -46,7 +46,7 @@ def test_rc_ordering():
 # --- schema / load ----------------------------------------------------------
 
 def test_example_validates():
-    assert base()["platform"] == "27.2.0"
+    assert base()["platform"] == "26.11.0"
 
 
 def test_unknown_top_level_key_refused(tmp_path):

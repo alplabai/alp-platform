@@ -1,8 +1,8 @@
 # EXAMPLE ONLY -- illustrative placeholder versions, not a real release.
 # A real manifest lives at the root of a line/<YY.M> branch as platform.yaml.
 schema: alp-platform-v1
-platform: 27.2.0
-released: 2027-02-26
+platform: 26.11.0
+released: 2026-11-30
 components:
   alp-sdk:        { version: 0.18.0 }
   tan-cli:        { version: 0.8.0 }

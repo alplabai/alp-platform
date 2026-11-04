@@ -41,10 +41,10 @@
 </defs>
 <rect class="bg" x="0.5" y="0.5" width="959" height="475" rx="12"/>
 <text class="t h" x="24" y="36" font-size="18" text-anchor="start">One platform version pins a tested set of components</text>
-<text class="t q" x="24" y="58" font-size="13" text-anchor="start">Example: Alp Platform 27.2.0 (versions illustrative)</text>
+<text class="t q" x="24" y="58" font-size="13" text-anchor="start">Example: Alp Platform 26.11.0 (versions illustrative)</text>
 <rect class="acc" x="24" y="76" width="912" height="56" rx="8"/>
-<text class="t h" x="480" y="101" font-size="17" text-anchor="middle">Alp Platform 27.2.0</text>
-<text class="t q" x="480" y="121" font-size="12" text-anchor="middle">CalVer · platform.yaml · tag platform-v27.2.0</text>
+<text class="t h" x="480" y="101" font-size="17" text-anchor="middle">Alp Platform 26.11.0</text>
+<text class="t q" x="480" y="121" font-size="12" text-anchor="middle">CalVer · platform.yaml · tag platform-v26.11.0</text>
 <text class="t q h" x="24" y="162" font-size="11.5" text-anchor="start">OWNED — exact version pinned, each keeps its own SemVer</text>
 <rect class="own" x="24" y="174" width="168" height="104" rx="8"/>
 <text class="t h" x="108.0" y="200" font-size="12.5" text-anchor="middle">alp-sdk</text>

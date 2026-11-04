@@ -4,7 +4,7 @@
 
 Components always release before the platform tag.
 
-1. **Freeze** two weeks before the line's month. Each component cuts its own release
+1. **Freeze** about two weeks before the planned release date. Each component cuts its own release
    through its own flow (alp-sdk, tan-cli, alp-sdk-vscode, gd32-bridge-firmware,
    cc3501e-bridge-firmware).
 2. **Write the manifest.** Branch `line/YY.M` from `main`, add `platform.yaml` at the root
@@ -20,10 +20,13 @@ Components always release before the platform tag.
    re-runs the online gate, and publishes the release with `platform.yaml` as an asset.
    Add the component table and prebuilt images to the release page.
 
+## Cadence
+
+![A new line every one to two months: the latest line gets all fixes, the previous line security and brick-risk fixes for three months](docs/images/support-windows.svg)
+
+A new line ships every one to two months, when a bench-validated set is ready; it takes the month it ships in. The first line is 26.11 (November 2026). The latest line gets every MICRO fix; the previous line gets security and brick-risk fixes for three months after the next line ships.
+
 ## MICRO vs new line
-
-![Quarterly lines: the latest line gets all fixes, the previous line security and brick-risk fixes only](docs/images/support-windows.svg)
-
 
 A MICRO may take component PATCH releases and add a validated `hw_rev`. A component MINOR
 or MAJOR, any ABI break, a bridge wire-protocol change, or a Zephyr / hal_alif / Yocto
