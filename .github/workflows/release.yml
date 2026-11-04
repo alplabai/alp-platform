@@ -1,0 +1,38 @@
+name: release
+
+on:
+  push:
+    tags: ["platform-v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml jsonschema
+      - name: Tag must equal the manifest platform field
+        run: |
+          want="platform-v$(python -c "import yaml;print(yaml.safe_load(open('platform.yaml'))['platform'])")"
+          if [ "$want" != "$GITHUB_REF_NAME" ]; then
+            echo "tag $GITHUB_REF_NAME does not match platform.yaml ($want)" >&2
+            exit 1
+          fi
+      - name: Online manifest gate
+        env:
+          GITHUB_TOKEN: ${{ secrets.PLATFORM_GATE_TOKEN || secrets.GITHUB_TOKEN }}
+        run: python tools/platform_manifest.py check platform.yaml --online
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          flags=""
+          case "$GITHUB_REF_NAME" in *-rc*) flags="--prerelease";; esac
+          gh release create "$GITHUB_REF_NAME" platform.yaml \
+            --repo "$GITHUB_REPOSITORY" --title "Alp Platform ${GITHUB_REF_NAME#platform-v}" \
+            --generate-notes $flags
