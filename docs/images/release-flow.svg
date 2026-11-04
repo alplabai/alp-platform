@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 312" width="960" height="312" role="img" aria-label="Components release first; the platform tag comes last">
+<title>Components release first; the platform tag comes last</title>
+<style>
+  .bg{fill:#ffffff;stroke:#d0d7de;stroke-width:1}
+  .t{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;fill:#1f2328}
+  .q{fill:#59636e}
+  .h{font-weight:600}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .box{fill:#ffffff;stroke:#8c959f;stroke-width:1.25}
+  .acc{fill:#ddf4ff;stroke:#0969da;stroke-width:2}
+  .own{fill:#ffffff;stroke:#0969da;stroke-width:1.25}
+  .rec{fill:#f6f8fa;stroke:#8c959f;stroke-width:1;stroke-dasharray:4 3}
+  .hw{fill:#dafbe1;stroke:#1a7f37;stroke-width:1.25}
+  .warn{fill:#fff1e5;stroke:#bc4c00;stroke-width:1.5}
+  .ln{stroke:#8c959f;stroke-width:1.25;fill:none}
+  .lnacc{stroke:#0969da;stroke-width:1.5;fill:none}
+  .band1{fill:#0969da;fill-opacity:.22;stroke:#0969da;stroke-width:1.25}
+  .band2{fill:#bc4c00;fill-opacity:.16;stroke:#bc4c00;stroke-width:1.25}
+  .grid{stroke:#d0d7de;stroke-width:1}
+  .ah{fill:#8c959f}
+  .ahacc{fill:#0969da}
+  @media (prefers-color-scheme: dark){
+    .bg{fill:#0d1117;stroke:#30363d}
+    .t{fill:#e6edf3} .q{fill:#9198a1}
+    .box{fill:#161b22;stroke:#656c76}
+    .acc{fill:#0d2a4a;stroke:#4493f8}
+    .own{fill:#161b22;stroke:#4493f8}
+    .rec{fill:#151b23;stroke:#656c76}
+    .hw{fill:#0f2e1a;stroke:#3fb950}
+    .warn{fill:#341a00;stroke:#db6d28}
+    .ln{stroke:#656c76} .lnacc{stroke:#4493f8}
+    .band1{fill:#4493f8;stroke:#4493f8}
+    .band2{fill:#db6d28;stroke:#db6d28}
+    .grid{stroke:#30363d}
+    .ah{fill:#656c76} .ahacc{fill:#4493f8}
+  }
+</style>
+<defs>
+  <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0 0L10 5L0 10z"/></marker>
+  <marker id="aa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ahacc" d="M0 0L10 5L0 10z"/></marker>
+</defs>
+<rect class="bg" x="0.5" y="0.5" width="959" height="311" rx="12"/>
+<text class="t h" x="24" y="36" font-size="18" text-anchor="start">Components release first; the platform tag comes last</text>
+<rect class="box" x="24" y="70" width="136" height="76" rx="8"/>
+<text class="t h" x="92.0" y="96" font-size="13" text-anchor="middle">1  Freeze</text>
+<text class="t q" x="92.0" y="117" font-size="11.5" text-anchor="middle">pick component</text>
+<text class="t q" x="92.0" y="133" font-size="11.5" text-anchor="middle">versions</text>
+<rect class="box" x="180" y="70" width="136" height="76" rx="8"/>
+<text class="t h" x="248.0" y="96" font-size="13" text-anchor="middle">2  Manifest</text>
+<text class="t q" x="248.0" y="117" font-size="11.5" text-anchor="middle">platform.yaml on</text>
+<text class="t q" x="248.0" y="133" font-size="11.5" text-anchor="middle">line/YY.M, tag -rc1</text>
+<path class="ln" d="M160 108.0H180" marker-end="url(#a)"/>
+<rect class="warn" x="336" y="70" width="136" height="76" rx="8"/>
+<text class="t h" x="404.0" y="96" font-size="13" text-anchor="middle">3  Manifest gate</text>
+<text class="t q" x="404.0" y="117" font-size="11.5" text-anchor="middle">releases exist, SDK</text>
+<text class="t q" x="404.0" y="133" font-size="11.5" text-anchor="middle">bounds, GPE floor</text>
+<path class="ln" d="M316 108.0H336" marker-end="url(#a)"/>
+<rect class="box" x="492" y="70" width="136" height="76" rx="8"/>
+<text class="t h" x="560.0" y="96" font-size="13" text-anchor="middle">4  Bench</text>
+<text class="t q" x="560.0" y="117" font-size="11.5" text-anchor="middle">HIL on every</text>
+<text class="t q" x="560.0" y="133" font-size="11.5" text-anchor="middle">validated hw_rev</text>
+<path class="ln" d="M472 108.0H492" marker-end="url(#a)"/>
+<rect class="box" x="648" y="70" width="136" height="76" rx="8"/>
+<text class="t h" x="716.0" y="96" font-size="13" text-anchor="middle">5  Promote</text>
+<text class="t q" x="716.0" y="117" font-size="11.5" text-anchor="middle">rc to GA, gate</text>
+<text class="t q" x="716.0" y="133" font-size="11.5" text-anchor="middle">runs again</text>
+<path class="ln" d="M628 108.0H648" marker-end="url(#a)"/>
+<rect class="acc" x="804" y="70" width="136" height="76" rx="8"/>
+<text class="t h" x="872.0" y="96" font-size="13" text-anchor="middle">6  Tag + publish</text>
+<text class="t q" x="872.0" y="117" font-size="11.5" text-anchor="middle">platform-vYY.M.0</text>
+<text class="t q" x="872.0" y="133" font-size="11.5" text-anchor="middle">release + assets</text>
+<path class="ln" d="M784 108.0H804" marker-end="url(#a)"/>
+<path class="ln" d="M404.0 146V186H248.0V150" marker-end="url(#a)"/>
+<path class="ln" d="M560.0 146V186H404.0"/>
+<text class="t q" x="404.0" y="204" font-size="11.5" text-anchor="middle">a failed check or bench run goes back to the manifest</text>
+<rect class="warn" x="24" y="236" width="912" height="52" rx="8"/>
+<text class="t h" x="40" y="258" font-size="13" text-anchor="start">CC3501E: the gate refuses gpe_stamp ≤ gpe_floor.</text>
+<text class="t " x="40" y="277" font-size="12.5" text-anchor="start">Flashing a GPE stamp at or below what a part has seen permanently bricks the bridge.</text>
+</svg>

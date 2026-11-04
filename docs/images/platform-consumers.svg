@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 350" width="960" height="350" role="img" aria-label="One pin in the workspace; every tool reads the same file">
+<title>One pin in the workspace; every tool reads the same file</title>
+<style>
+  .bg{fill:#ffffff;stroke:#d0d7de;stroke-width:1}
+  .t{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;fill:#1f2328}
+  .q{fill:#59636e}
+  .h{font-weight:600}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .box{fill:#ffffff;stroke:#8c959f;stroke-width:1.25}
+  .acc{fill:#ddf4ff;stroke:#0969da;stroke-width:2}
+  .own{fill:#ffffff;stroke:#0969da;stroke-width:1.25}
+  .rec{fill:#f6f8fa;stroke:#8c959f;stroke-width:1;stroke-dasharray:4 3}
+  .hw{fill:#dafbe1;stroke:#1a7f37;stroke-width:1.25}
+  .warn{fill:#fff1e5;stroke:#bc4c00;stroke-width:1.5}
+  .ln{stroke:#8c959f;stroke-width:1.25;fill:none}
+  .lnacc{stroke:#0969da;stroke-width:1.5;fill:none}
+  .band1{fill:#0969da;fill-opacity:.22;stroke:#0969da;stroke-width:1.25}
+  .band2{fill:#bc4c00;fill-opacity:.16;stroke:#bc4c00;stroke-width:1.25}
+  .grid{stroke:#d0d7de;stroke-width:1}
+  .ah{fill:#8c959f}
+  .ahacc{fill:#0969da}
+  @media (prefers-color-scheme: dark){
+    .bg{fill:#0d1117;stroke:#30363d}
+    .t{fill:#e6edf3} .q{fill:#9198a1}
+    .box{fill:#161b22;stroke:#656c76}
+    .acc{fill:#0d2a4a;stroke:#4493f8}
+    .own{fill:#161b22;stroke:#4493f8}
+    .rec{fill:#151b23;stroke:#656c76}
+    .hw{fill:#0f2e1a;stroke:#3fb950}
+    .warn{fill:#341a00;stroke:#db6d28}
+    .ln{stroke:#656c76} .lnacc{stroke:#4493f8}
+    .band1{fill:#4493f8;stroke:#4493f8}
+    .band2{fill:#db6d28;stroke:#db6d28}
+    .grid{stroke:#30363d}
+    .ah{fill:#656c76} .ahacc{fill:#4493f8}
+  }
+</style>
+<defs>
+  <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0 0L10 5L0 10z"/></marker>
+  <marker id="aa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ahacc" d="M0 0L10 5L0 10z"/></marker>
+</defs>
+<rect class="bg" x="0.5" y="0.5" width="959" height="349" rx="12"/>
+<text class="t h" x="24" y="36" font-size="18" text-anchor="start">One pin in the workspace; every tool reads the same file</text>
+<rect class="acc" x="24" y="70" width="220" height="70" rx="8"/>
+<text class="t h" x="134" y="96" font-size="13" text-anchor="middle">alplabai/alp-platform</text>
+<text class="t q" x="134" y="116" font-size="11.5" text-anchor="middle">release asset platform.yaml</text>
+<text class="t q" x="134" y="132" font-size="11.5" text-anchor="middle">or --manifest FILE</text>
+<rect class="own" x="320" y="70" width="220" height="70" rx="8"/>
+<text class="t h mono" x="430" y="96" font-size="13" text-anchor="middle">tan platform use 26.11</text>
+<text class="t q" x="430" y="116" font-size="11.5" text-anchor="middle">validates, writes the pin</text>
+<text class="t q" x="430" y="132" font-size="11.5" text-anchor="middle">never flashes firmware</text>
+<rect class="hw" x="616" y="70" width="320" height="70" rx="8"/>
+<text class="t h mono" x="776" y="96" font-size="13" text-anchor="middle">&lt;west topdir&gt;/.alp/platform.yaml</text>
+<text class="t q" x="776" y="118" font-size="11.5" text-anchor="middle">the pin: byte-identical to the asset</text>
+<path class="ln" d="M244 105H320" marker-end="url(#a)"/>
+<path class="ln" d="M540 105H616" marker-end="url(#a)"/>
+<rect class="box" x="216" y="210" width="224" height="96" rx="8"/>
+<text class="t h" x="328" y="236" font-size="13" text-anchor="middle">alp.lock</text>
+<text class="t q" x="328" y="258" font-size="11.5" text-anchor="middle">platform: version +</text>
+<text class="t q" x="328" y="275" font-size="11.5" text-anchor="middle">manifestSha256</text>
+<text class="t q" x="328" y="292" font-size="11.5" text-anchor="middle">verify reports drift</text>
+<rect class="box" x="464" y="210" width="224" height="96" rx="8"/>
+<text class="t h" x="576" y="236" font-size="13" text-anchor="middle">tan doctor</text>
+<text class="t q" x="576" y="258" font-size="11.5" text-anchor="middle">data.platform</text>
+<text class="t q" x="576" y="275" font-size="11.5" text-anchor="middle">per-component status</text>
+<text class="t q" x="576" y="292" font-size="11.5" text-anchor="middle">match / mismatch / unknown</text>
+<rect class="box" x="712" y="210" width="224" height="96" rx="8"/>
+<text class="t h" x="824" y="236" font-size="13" text-anchor="middle">VS Code extension</text>
+<text class="t q" x="824" y="258" font-size="11.5" text-anchor="middle">Alp Platform 26.11.0</text>
+<text class="t q" x="824" y="275" font-size="11.5" text-anchor="middle">in the status bar</text>
+<text class="t q" x="824" y="292" font-size="11.5" text-anchor="middle">off-manifest warning</text>
+<path class="ln" d="M776 140V170H328V210" marker-end="url(#a)"/>
+<path class="ln" d="M576 170V210" marker-end="url(#a)"/>
+<path class="ln" d="M776 170H824V210" marker-end="url(#a)"/>
+<path class="lnacc" d="M688 258H712" marker-end="url(#aa)"/>
+<text class="t q" x="700" y="330" font-size="11.5" text-anchor="middle">the extension reads tan doctor; it never parses the manifest</text>
+</svg>
