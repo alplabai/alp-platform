@@ -1,9 +1,9 @@
 # Alp Platform 26.11 -- the first line.
 schema: alp-platform-v1
-platform: 26.11.0-rc1
+platform: 26.11.0
 released: 2026-11-05
 components:
-  alp-sdk:        { version: 0.18.0-rc1 }
+  alp-sdk:        { version: 0.18.0 }
   tan-cli:        { version: 0.8.0 }
   alp-sdk-vscode: { version: 0.8.0 }
   gd32-bridge-firmware:    { version: 0.3.1, protocol: "0.14" }
