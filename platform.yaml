@@ -1,0 +1,17 @@
+# Alp Platform 26.11 -- the first line.
+schema: alp-platform-v1
+platform: 26.11.0-rc1
+released: 2026-11-05
+components:
+  alp-sdk:        { version: 0.18.0-rc1 }
+  tan-cli:        { version: 0.8.0 }
+  alp-sdk-vscode: { version: 0.8.0 }
+  gd32-bridge-firmware:    { version: 0.3.1, protocol: "0.14" }
+  cc3501e-bridge-firmware: { version: 0.9.3, gpe_stamp: 0.254.43.0, gpe_floor: 0.254.42.0 }
+recorded:
+  zephyr: v4.4.1
+  hal_alif: v2.3.0
+  yocto: [kirkstone, scarthgap]
+validated_hw:
+  - { som: E1M-AEN801, rev: 2626-r2 }
+bench_evidence: null
