@@ -36,8 +36,8 @@ tan platform clear          # remove the pin
   names the tested set it was built from.
 - The VS Code extension shows `Alp Platform <version>` in the status bar and warns when
   a component in the workspace differs from the manifest.
-- While this repo is private, fetching a manifest needs a `GITHUB_TOKEN` with read
-  access. Offline, use `tan platform use --manifest platform.yaml`.
+- This repo is public, so fetching a manifest needs no token. Offline, use
+  `tan platform use --manifest platform.yaml`.
 
 > **Nothing is flashed.** Pinning a platform never writes firmware to a board. Bridge
 > firmware versions are reported; programming a board stays an explicit, separate step.
@@ -122,7 +122,7 @@ versions).
 ```sh
 pip install -r requirements-dev.txt
 python tools/platform_manifest.py check platform.yaml            # offline
-python tools/platform_manifest.py check platform.yaml --online   # needs GITHUB_TOKEN
+python tools/platform_manifest.py check platform.yaml --online   # GITHUB_TOKEN optional, avoids rate limits
 python tools/platform_manifest.py check platform.yaml --online --json
 python -m pytest -q                                              # tool tests
 ```
